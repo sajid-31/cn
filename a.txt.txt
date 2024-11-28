@@ -1,0 +1,218 @@
+# Create a new simulator instance
+set ns [new Simulator]
+
+# Set the routing protocol to Link State (LS)
+$ns rtproto LS
+
+# Create nodes
+set node1 [$ns node]
+set node2 [$ns node]
+set node3 [$ns node]
+set node4 [$ns node]
+set node5 [$ns node]
+set node6 [$ns node]
+set node7 [$ns node]
+
+# Open trace files for output
+set tf [open out.tr w]
+$ns trace-all $tf
+
+set nf [open out.nam w]
+$ns namtrace-all $nf
+
+# Label nodes
+$node1 label "Node 1"
+$node2 label "Node 2"
+$node3 label "Node 3"
+$node4 label "Node 4"
+$node5 label "Node 5"
+$node6 label "Node 6"
+$node7 label "Node 7"
+
+# Set node label colors
+$node1 label-color blue
+$node2 label-color red
+$node3 label-color red
+$node4 label-color blue
+$node5 label-color blue
+$node6 label-color blue
+$node7 label-color blue
+
+# Create duplex links between nodes
+$ns duplex-link $node1 $node2 1.5Mb 10ms DropTail
+$ns duplex-link $node2 $node3 1.5Mb 10ms DropTail
+$ns duplex-link $node3 $node4 1.5Mb 10ms DropTail
+$ns duplex-link $node4 $node5 1.5Mb 10ms DropTail
+$ns duplex-link $node5 $node6 1.5Mb 10ms DropTail
+$ns duplex-link $node6 $node7 1.5Mb 10ms DropTail
+$ns duplex-link $node7 $node1 1.5Mb 10ms DropTail
+
+# Set link orientations for visualization
+$ns duplex-link-op $node1 $node2 orient left-down
+$ns duplex-link-op $node2 $node3 orient left-down
+$ns duplex-link-op $node3 $node4 orient right-down
+$ns duplex-link-op $node4 $node5 orient right
+$ns duplex-link-op $node5 $node6 orient right-up
+$ns duplex-link-op $node6 $node7 orient left-up
+$ns duplex-link-op $node7 $node1 orient left-up
+
+# Create TCP agents and a sink
+set tcp2 [new Agent/TCP]
+$ns attach-agent $node1 $tcp2
+
+set sink2 [new Agent/TCPSink]
+$ns attach-agent $node4 $sink2
+$ns connect $tcp2 $sink2
+
+# Create and attach the FTP application
+set traffic_ftp2 [new Application/FTP]
+$traffic_ftp2 attach-agent $tcp2
+
+# Define the finish procedure
+proc finish {} {
+    global ns nf
+    $ns flush-trace
+    close $nf
+    exec nam out.nam &
+    exit 0
+}
+
+# Schedule events
+$ns at 0.5 "$traffic_ftp2 start"
+$ns rtmodel-at 1.0 down $node2 $node3
+$ns rtmodel-at 2.0 up $node2 $node3
+$ns at 3.0 "$traffic_ftp2 start"
+$ns at 4.0 "$traffic_ftp2 stop"
+$ns at 5.0 "finish"
+
+# Run the simulation
+$ns run
+
+
+sliding window
+Source Code:
+
+set ns [new Simulator]
+#puts "Starting program..."
+# Creating Output files
+set namf [open stop_wait_protocol.nam w]
+$ns namtrace-all $namf
+
+set trf [open stop_wait_protocol.tr w]
+$ns trace-all $trf
+ 
+# Finishing procedures
+proc finish {} {          
+            global ns namf trf
+            $ns flush-trace
+            #puts "Saving namf and trf..."
+            close $namf
+            close $trf
+            #puts "Opening Network animator..."
+            exec nam stop_wait_protocol.nam &
+            #puts "Closing program..."
+            exit 0
+
+}
+
+ 
+
+# Creating nodes
+set n0 [$ns node]
+set n1 [$ns node]
+ 
+
+# Setting links and setting queue size
+$ns duplex-link $n0 $n1 0.2Mb 200ms DropTail
+$ns duplex-link-op $n0 $n1 orient right
+$ns queue-limit $n0 $n1 10
+
+ 
+
+# Defining agents and setting src and dest
+
+set tcp [new Agent/TCP]
+set sink [new Agent/TCPSink]
+$ns attach-agent $n0 $tcp
+$ns attach-agent $n1 $sink
+$ns connect $tcp $sink
+ 
+# Creating FTP
+set ftp [new Application/FTP]
+$ftp attach-agent $tcp
+
+ 
+# Stop and wait protocol
+$tcp set window_ 1
+$tcp set maxcwnd_ 1
+
+
+# Use below 2 # for sliding window
+#$tcp set windowInit_ 4
+#$tcp set maxcwnd_ 4
+
+
+$tcp set nam_tracevar_ true
+$ns add-agent-trace $tcp tcp
+$ns monitor-agent-trace $tcp
+$tcp tracevar cwnd_
+# Finishing and closing procedures
+
+$ns at 0.1 "$ftp start"
+$ns at 3.0 "$ns detach-agent $n0 $tcp"
+$ns at 3.0 "$ns detach-agent $n1 $sink"
+$ns at 3.5 "$ftp stop"
+$ns at 5.0 "finish"
+$ns run
+
+
+
+import smtplib
+# list of email_id to send the mail
+li = [ "receiver_email1@gmail.com", "receiver_email2@gmail.com"]
+for dest in li:
+s = smtplib.SMTP('smtp.gmail.com', 587)
+s.starƩls()
+s.login("sender_email@gmail.com", "App password ")
+message = "hello my dear friends"
+s.sendmail("thakurvidhatri45368@gmail.com", dest, message)
+s.quit()
+
+
+import socket
+def run_client():
+    client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    server_ip = "192.168.31.129"
+    server_port = 8000
+    client.connect((server_ip,server_port))
+    while True:
+        msg = input("enter message: ")
+        client.send(msg.encode("utf-8")[:1024])
+        response = client.recv(1024)
+        response = response.decode("utf-8")
+        if response.lower() == "closed":
+            break
+        print(response)
+    client.close()
+run_client()
+
+import socket
+def run_server():
+    server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    server_ip = "0.0.0.0"
+    port = 8000
+    server.bind((server_ip,port))
+    server.listen(0)
+    client_socket,client_address = server.accept()
+    while True:
+        request = client_socket.recv(1024)
+        request = request.decode("utf-8")
+        if request.lower() == "close":
+            client_socket.send("closed".encode("utf-8"))
+            break
+        print(request)
+        response = "accepted".encode("utf-8")
+        client_socket.send(response)
+    client_socket.close()
+    server.close()
+run_server()
